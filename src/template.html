@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="author" content="Faustus Studio · 浮士德工作室">
+<title>镜像地球·滨江 V0.2 — Faustus Studio · 浮士德工作室</title>
+<style>{{STYLE}}</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud" class="card hide">
+  <div><b id="hudTime">--:--</b> <span class="dim" id="hudDate"></span><span id="hudMode">步行</span></div>
+  <div id="hudWx">天气：加载中…</div>
+  <div class="dim" id="hudWx2"></div>
+  <div id="hudPlace">📍 —</div>
+  <div class="dim" id="hudCoord"></div>
+</div>
+<div id="miniWrap" class="hide"><canvas id="mini" width="136" height="136"></canvas><div id="miniN">北</div></div>
+<div id="cross" class="hide"><i></i></div>
+<div id="hint" class="card hide"></div>
+<div id="toast" class="card"></div>
+<div id="fps" class="hide"></div>
+<div id="attr" class="hide">地图数据 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>（ODbL） · 实时天气 Open-Meteo · 镜像地球·滨江 V0.2 · Faustus Studio · 浮士德工作室</div>
+
+<div id="touch" class="hide">
+  <div id="joy"><div id="knob"></div></div>
+  <div class="tb" id="tbJump" style="right:22px;bottom:150px">跳</div>
+  <div class="tb" id="tbBreak" style="right:92px;bottom:96px">破坏</div>
+  <div class="tb" id="tbBlast" style="right:22px;bottom:34px">爆破</div>
+  <div class="tb" id="tbCar" style="right:162px;bottom:34px">上/下车</div>
+  <div class="tb sm" id="tbHeli" style="right:228px;bottom:34px">直升机</div>
+  <div class="tb" id="tbRun" style="right:162px;bottom:160px">跑</div>
+  <div class="tb sm" id="tbView" style="right:128px;top:14px">视角</div>
+  <div class="tb sm" id="tbFly" style="right:178px;top:14px">飞行</div>
+  <div class="tb sm" id="tbTime" style="right:228px;top:14px">时间</div>
+  <div class="tb sm" id="tbWx" style="right:278px;top:14px">天气</div>
+  <div class="tb sm" id="tbMenu" style="right:328px;top:14px">☰</div>
+</div>
+
+<div id="loading"><div style="font-size:24px;letter-spacing:3px">镜像地球·滨江</div><div id="bar"><i></i></div><div id="loadtxt">正在把滨江体素化…</div></div>
+
+<div id="start" class="hide">
+  <h1>镜像地球·滨江</h1>
+  <div class="sub">把真实的城市搬进体素世界 — 走、跑、开车、开直升机、拆楼，街上有行人和车辆，天气与时间同步现实</div>
+  <div class="ver">V0.2 原型 · 杭州滨江（约 1.6 km × 1.6 km，含星澜里） · 数据：OpenStreetMap</div>
+  <div><button class="btn" id="btnStart">开始游戏</button></div>
+  <div><button class="btn ghost" id="btnHelp">操作说明</button></div>
+  <div id="startStat" style="font-size:12px;opacity:.6;margin-top:6px"></div>
+  <div id="credit">Faustus Studio · 浮士德工作室 出品<br>地图数据 © OpenStreetMap contributors · 天气 Open-Meteo</div>
+</div>
+
+<div id="pause" class="hide"><h2>已暂停</h2><button class="btn" id="btnResume">继续</button><button class="btn ghost" id="btnHelp2">操作说明</button></div>
+
+<div id="help" class="hide"><div class="box card">
+  <h2>操作说明</h2>
+  <div id="helpKb"><h3>键盘 + 鼠标（电脑）</h3>
+  <table>
+    <tr><td>W A S D</td><td>前进 / 左移 / 后退 / 右移（开车：W 油门、S 刹车倒车、A D 转向）</td></tr>
+    <tr><td>Shift</td><td>跑步（开车时：加速）</td></tr>
+    <tr><td>空格</td><td>跳跃（开车时：手刹；飞行时：上升）</td></tr>
+    <tr><td>鼠标</td><td>环顾四周（点击画面进入/锁定鼠标）</td></tr>
+    <tr><td>B 或 鼠标左键</td><td>破坏准星指着的方块（按住连续破坏）</td></tr>
+    <tr><td>Q 或 鼠标右键</td><td>爆破：炸掉周围一大片（有冷却），悬空的楼体会塌落</td></tr>
+    <tr><td>J</td><td>上车 / 下车（靠近汽车 6 米内）；在直升机里则为离开</td></tr>
+    <tr><td>U</td><td>召唤直升机（飞到你身边降落），或在近处登机</td></tr>
+    <tr><td>E</td><td>离开直升机（需接近地面）</td></tr>
+    <tr><td>V</td><td>切换第一人称 / 第三人称</td></tr>
+    <tr><td>F</td><td>飞行模式开关（空格上升、C 下降、Shift 加速）</td></tr>
+    <tr><td>T</td><td>切换时间：实时 → 清晨 → 正午 → 黄昏 → 深夜</td></tr>
+    <tr><td>Y</td><td>切换天气：实时 → 晴 → 多云 → 雨 → 雾 → 雪</td></tr>
+    <tr><td>R</td><td>回到出生点</td></tr>
+    <tr><td>H / Esc</td><td>帮助 / 暂停</td></tr>
+  </table></div>
+  <div id="helpTouch"><h3>触屏（手机 / 平板）</h3>
+  <p>左下摇杆移动（推到底自动奔跑）；屏幕空白处滑动转视角；右下按钮：跳、破坏（按住连破）、爆破、上/下车、直升机、跑（切换）、视角、飞行、时间、天气。</p></div>
+  <h3>小贴士</h3>
+  <ul>
+    <li>地图是真实的 OpenStreetMap 数据：建筑轮廓、道路、河道、绿地都对应现实位置，右上角小地图随你转向。没有标注高度的楼是按类型估算的。</li>
+    <li>开车撞建筑速度够快会直接撞出一个洞；路上的 NPC 车辆也可以被撞开。炸掉承重墙，上面的楼体会塌下来。</li>
+    <li>按 U 召唤直升机，降落后再按 U 登机。WASD 飞、空格上升、C 下降、Shift 加速，碰到楼会弹开。E 或 J 离开。</li>
+    <li>出生点在星澜里（西兴路 2333 号）附近。西部还能看到滨江区政府一带。</li>
+    <li>HUD 会显示杭州本地时间和 Open-Meteo 的实时天气（气温、云量、降水、风）；雨/雪/雾/天空会跟着变。断网时按晴天处理。</li>
+    <li>晚上附近会有手电 / 车灯，窗户会亮起来。</li>
+  </ul>
+  <p class="dim">V0.2 原型 · Faustus Studio · 浮士德工作室 · 地图数据 © OpenStreetMap contributors（ODbL）</p>
+  <div style="text-align:center;margin-top:10px"><button class="btn" id="btnHelpClose">知道了</button></div>
+</div></div>
+
+<script id="areadata" type="application/json">{{DATA}}</script>
+<script>{{SCRIPT}}</script>
+</body>
+</html>
